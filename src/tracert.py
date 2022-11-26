@@ -10,29 +10,29 @@ def tracert(dest):
         print(f"Service {dest} not known, try again")
         exit(1)
 
-    port = 9090
+    port = 33434
     max_hops = 30
     ttl = 1
     print(f"Trace to {name} ({address[0]}), maximum {max_hops} hops")
 
-    while True:
+    finishRequests = False
+    while not finishRequests:
         udp_socket = create_udp_socket(ttl)
         icmp_socket = create_icmp_socket(port)
         print(f"{ttl} ", end="", flush=True)
         udp_socket.sendto(bytes("", "utf-8"), (dest, port))
-        curr_name, curr_address, finished = receive_packages(icmp_socket)
+        curr_name, curr_address = receive_packages(icmp_socket)
         udp_socket.close()
         icmp_socket.close()
         ttl += 1
 
         if curr_address is not None:
             print(f"{curr_name} {curr_address}")
-        if curr_address == address or ttl > max_hops:
+        else: 
             print()
-            break
-        if not finished:
-            print()
-            continue
+        if curr_address == address[0] or ttl > max_hops:
+            finishRequests = True
+
 
 
 if __name__ == "__main__":
